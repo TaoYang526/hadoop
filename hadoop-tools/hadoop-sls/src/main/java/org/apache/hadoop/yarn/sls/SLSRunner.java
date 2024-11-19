@@ -103,7 +103,8 @@ public class SLSRunner extends Configured implements Tool {
   }
 
   public SLSRunner() throws ClassNotFoundException, YarnException {
-    Configuration tempConf = new Configuration(false);
+    // load default configuration at beginning
+    Configuration tempConf = new Configuration(true);
     init(tempConf);
   }
 

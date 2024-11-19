@@ -77,6 +77,7 @@ public class NMSimulator extends TaskRunner.Task {
   private int responseId = 0;
   private float resourceUtilizationRatio;
   private final static Logger LOG = LoggerFactory.getLogger(NMSimulator.class);
+  private boolean slow;
   
   public void init(String nodeIdStr, Resource nodeResource, int dispatchTime,
       int heartBeatInterval, ResourceManager pRm,
@@ -314,5 +315,13 @@ public class NMSimulator extends TaskRunner.Task {
               "Updated runningApps on this node are: {}",
           applicationId, getNode().getNodeID(), getNode().getRunningApps());
     }
+  }
+
+  public void setSlow(boolean slow) {
+    this.slow = slow;
+  }
+
+  public boolean isSlow() {
+    return slow;
   }
 }

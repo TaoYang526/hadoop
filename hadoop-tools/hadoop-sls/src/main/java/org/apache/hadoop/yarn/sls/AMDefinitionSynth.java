@@ -138,7 +138,8 @@ public class AMDefinitionSynth extends AMDefinition {
       if (baselineTimeMs == 0) {
         baselineTimeMs = jobStartTime;
       }
-      adjustTimeValuesToBaselineTime(amDef, this, baselineTimeMs);
+      // Fix issue: all workloads start at beginning and not respect time_distribution
+      //adjustTimeValuesToBaselineTime(amDef, this, baselineTimeMs);
       return amDef;
     }
   }

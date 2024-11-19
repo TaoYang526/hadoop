@@ -51,7 +51,9 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.concurrent.HadoopScheduledThreadPoolExecutor;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.Resource;
+import org.apache.hadoop.yarn.server.resourcemanager.ClusterMetrics;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.AbstractYarnScheduler;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.QueueMetrics;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplication;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerApplicationAttempt;
@@ -189,6 +191,8 @@ public abstract class SchedulerMetrics {
     jobRuntimeLogBW.write("JobID,real_start_time,real_end_time," +
         "simulate_start_time,simulate_end_time" + EOL);
     jobRuntimeLogBW.flush();
+    LOG.info("Initialized SchedulerMetrics: outputDir={}, webAppAddress={}",
+        metricsOutputDir, metricsWebAddressPort);
   }
 
   public MetricRegistry getMetrics() {
@@ -394,9 +398,60 @@ public abstract class SchedulerMetrics {
     );
   }
 
+
+  private QueueMetrics rootQueueMetrics;
+  private QueueMetrics getRootQueueMetrics() {
+    if (rootQueueMetrics == null && scheduler instanceof CapacityScheduler) {
+      CapacityScheduler cs = (CapacityScheduler)scheduler;
+      if (cs.getCapacitySchedulerQueueManager()!=null) {
+        rootQueueMetrics = scheduler.getRootQueueMetrics();
+      }
+    }
+    return rootQueueMetrics;
+  }
+
   private void registerSchedulerMetrics() {
     samplerLock.lock();
     try {
+      metrics.register("variable.scheduler.async-scheduling.pending-backlogs",
+          (Gauge<Integer>) () -> {
+            CapacityScheduler cs = null;
+            if (scheduler instanceof CapacityScheduler) {
+              cs = (CapacityScheduler)scheduler;
+            }
+            return cs == null ? 0 : cs.getAsyncSchedulingPendingBacklogs();
+          });
+      metrics.register("variable.scheduler.root.pending.containers",
+          (Gauge<Integer>) () -> {
+            QueueMetrics rootQueueMetric = getRootQueueMetrics();
+            return rootQueueMetric == null ? 0 : rootQueueMetric.getPendingContainers();
+          });
+      metrics.register("variable.scheduler.root.aggregate-allocated.containers",
+          (Gauge<Long>) () -> {
+            QueueMetrics rootQueueMetric = getRootQueueMetrics();
+            return rootQueueMetric == null ? 0 : rootQueueMetric.getAggregateAllocatedContainers();
+          });
+      ClusterMetrics clusterMetrics = ClusterMetrics.getMetrics();
+      if (clusterMetrics != null) {
+        metrics.register("variable.cluster.am-launch.delay-avg-time",
+            (Gauge<Double>) clusterMetrics::getAMLaunchDelayAvgTime);
+        metrics.register("variable.cluster.am-launch.delay-max-time",
+            (Gauge<Double>) clusterMetrics::getAMLaunchDelayMaxTime);
+        metrics.register("variable.cluster.rm-event-proc.cpu-avg",
+            (Gauge<Long>) clusterMetrics::getRmEventProcCPUAvg);
+        metrics.register("variable.cluster.rm-event-proc.cpu-max",
+            (Gauge<Long>) clusterMetrics::getRmEventProcCPUMax);
+        metrics.register("variable.cluster.rm-event-proc.queue-size",
+            (Gauge<Integer>) clusterMetrics::getRmEventQueueSize);
+        metrics.register("variable.cluster.scheduler-event-proc.queue-size",
+            (Gauge<Integer>) clusterMetrics::getSchedulerEventQueueSize);
+        metrics.register("variable.cluster.active-nodes",
+            (Gauge<Integer>) clusterMetrics::getNumActiveNMs);
+        metrics.register("variable.cluster.decommissioning-nodes",
+            (Gauge<Integer>) clusterMetrics::getNumDecommissioningNMs);
+        metrics.register("variable.cluster.decommissioned-nodes",
+            (Gauge<Integer>) clusterMetrics::getNumDecommisionedNMs);
+      }
       // counters for scheduler operations
       schedulerAllocateCounter = metrics.counter(
           "counter.scheduler.operation.allocate");

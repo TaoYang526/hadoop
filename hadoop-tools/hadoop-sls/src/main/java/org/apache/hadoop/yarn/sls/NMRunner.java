@@ -45,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class NMRunner {
   private static final Logger LOG = LoggerFactory.getLogger(NMRunner.class);
@@ -123,6 +124,8 @@ public class NMRunner {
         SLSConfiguration.RUNNER_POOL_SIZE_DEFAULT);
     ExecutorService executorService = Executors.
         newFixedThreadPool(threadPoolSize);
+    float slowRatio = conf.getFloat(SLSConfiguration.NM_SLOW_RATIO, 0);
+    final AtomicInteger numSlowNMs = new AtomicInteger(0);
     for (SLSRunner.NodeDetails nodeDetails : nodeSet) {
       executorService.submit(new Runnable() {
         @Override public void run() {
@@ -141,6 +144,13 @@ public class NMRunner {
             nmMap.put(nm.getNode().getNodeID(), nm);
             taskRunner.schedule(nm);
             rackSet.add(nm.getNode().getRackName());
+            if (slowRatio > 0){
+              boolean isSlow = random.nextFloat() < slowRatio;
+              if (isSlow) {
+                nm.setSlow(true);
+                numSlowNMs.incrementAndGet();
+              }
+            }
           } catch (IOException | YarnException e) {
             LOG.error("Got an error while adding node", e);
           }
@@ -151,6 +161,8 @@ public class NMRunner {
     executorService.awaitTermination(10, TimeUnit.MINUTES);
     numRacks = rackSet.size();
     numNMs = nmMap.size();
+    LOG.info("SLSRunner has generated {} racks and {} nodes, "
+            + "with {} slow nodes.", numRacks, numNMs, numSlowNMs.get());
   }
 
   void waitForNodesRunning() throws InterruptedException {

@@ -67,6 +67,15 @@ public class SLSConfiguration {
                                                   + "heartbeat.interval.ms";
   public static final String NM_RESOURCE_UTILIZATION_RATIO = NM_PREFIX
       + "resource.utilization.ratio";
+
+  public static final String NM_SLOW_PREFIX = NM_PREFIX + "slow.";
+  public static final String NM_SLOW_RATIO = NM_SLOW_PREFIX + "ratio";
+  public static final String NM_SLOW_CLEANUP_DELAY_MS = NM_SLOW_PREFIX + "cleanup-delay-ms";
+
+  public static final String NM_DECOMMISSION_PREFIX = NM_PREFIX + "decommission.";
+  public static final String NM_DECOMMISSION_RATIO = NM_DECOMMISSION_PREFIX + "ratio";
+  public static final String NM_DECOMMISSION_DELAY_MS = NM_DECOMMISSION_PREFIX + "delay-ms";
+
   public static final int AM_HEARTBEAT_INTERVAL_MS_DEFAULT = 1000;
   public static final String AM_TYPE = AM_PREFIX + "type";
   public static final String AM_TYPE_PREFIX = AM_TYPE + ".";
@@ -131,4 +140,7 @@ public class SLSConfiguration {
   public static final String TASK_REQUEST_DELAY = TASK_CONTAINER
       + "request.delay";
 
+  // whether to enable AM launcher
+  public static final String CONTROLLABLE_AM_LAUNCHER_ENABLED =
+      PREFIX + "controllable_am_launcher.enabled";
 }
