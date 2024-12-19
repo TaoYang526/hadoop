@@ -1,8 +1,8 @@
 {
-  "description": "long-running jobs workload",
-  "num_nodes": 1000,
+  "description": "tiny jobs workload",
+  "num_nodes": 6000,
   "nodes_per_rack": 4,
-  "num_jobs": 10,
+  "num_jobs": 10000,
   "rand_seed": 2,
   "workloads": [
     {
@@ -15,15 +15,15 @@
           "class_name": "class_1",
           "user_name": "foobar",
           "class_weight": 1.0,
-          "mtasks_avg": 10000,
+          "mtasks_avg": 5,
           "mtasks_stddev": 1,
-          "rtasks_avg": 100,
+          "rtasks_avg": 5,
           "rtasks_stddev": 1,
           "dur_avg": 60,
           "dur_stddev": 5,
-          "mtime_avg": 3000000,
+          "mtime_avg": 3000,
           "mtime_stddev": 0,
-          "rtime_avg": 3000000,
+          "rtime_avg": 3000,
           "rtime_stddev": 0,
           "map_max_memory_avg": 1024,
           "map_max_memory_stddev": 0.001,
@@ -43,7 +43,7 @@
       "time_distribution": [
         {
           "time": 1,
-          "weight": 50
+          "weight": 10
         },
         {
           "time": 60,
@@ -63,6 +63,26 @@
         },
         {
           "time": 300,
+          "weight": 10
+        },
+        {
+          "time": 360,
+          "weight": 10
+        },
+        {
+          "time": 420,
+          "weight": 10
+        },
+        {
+          "time": 480,
+          "weight": 10
+        },
+        {
+          "time": 540,
+          "weight": 10
+        },
+        {
+          "time": 600,
           "weight": 10
         }
       ]

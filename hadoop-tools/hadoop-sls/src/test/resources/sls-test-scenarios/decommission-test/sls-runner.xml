@@ -86,7 +86,6 @@
     <value>org.apache.hadoop.yarn.sls.scheduler.CapacitySchedulerMetrics</value>
   </property>
 
-
 <!--  <property>-->
 <!--    <name>yarn.sls.controllable_am_launcher.enabled</name>-->
 <!--    <value>true</value>-->
@@ -102,25 +101,19 @@
 <!--    <value>30000</value>-->
 <!--  </property>-->
 
-<!--  <property>-->
-<!--    <name>yarn.sls.nm.decommission.ratio</name>-->
-<!--    <value>0.1</value>-->
-<!--  </property>-->
+  <property>
+    <name>yarn.sls.nm.decommission.ratio</name>
+    <value>0.1</value>
+  </property>
 
-<!--  <property>-->
-<!--    <name>yarn.sls.nm.decommission.delay-ms</name>-->
-<!--    <value>120000</value>-->
-<!--  </property>-->
+  <property>
+    <name>yarn.sls.nm.decommission.delay-ms</name>
+    <value>45000</value>
+  </property>
 
-<!--  <property>-->
-<!--    <name>yarn.resourcemanager.nodes.exclude-path</name>-->
-<!--    <value>/tmp/sls-test-exclude-nodes</value>-->
-<!--  </property>-->
-
-
-<!--  <property>-->
-<!--    <name>yarn.resourcemanager.amlauncher.thread-count</name>-->
-<!--    <value>5</value>-->
-<!--  </property>-->
+  <property>
+    <name>yarn.resourcemanager.nodes.exclude-path</name>
+    <value>/tmp/sls-test-exclude-nodes</value>
+  </property>
 
 </configuration>

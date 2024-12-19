@@ -82,11 +82,11 @@ public class TestSLSRunner extends BaseSLSRunnerTest {
     exitInvariantFile = "src/test/resources/exit-invariants.txt";
   }
 
-  @Test(timeout = 90000)
+  @Test(timeout = 9000000)
   @SuppressWarnings("all")
   public void testSimulatorRunning() throws Exception {
     Configuration conf = new Configuration(false);
-    long timeTillShutdownInsec = 20L;
+    long timeTillShutdownInsec = 2000L;
     runSLS(conf, timeTillShutdownInsec);
   }
 

@@ -24,9 +24,8 @@ import org.apache.hadoop.yarn.sls.nodemanager.NMSimulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 
-public class MockAMRunnable implements Runnable {
+public class MockAMRunnable implements Runnable, Comparable<MockAMRunnable> {
 
   private static final Logger LOG =
       LoggerFactory.getLogger(MockAMRunnable.class);
@@ -112,5 +111,10 @@ public class MockAMRunnable implements Runnable {
       LOG.warn("Received unknown event-type " + eventType + ". Ignoring.");
       break;
     }
+  }
+
+  @Override
+  public int compareTo(MockAMRunnable o) {
+    return this.eventType.compareTo(o.eventType);
   }
 }

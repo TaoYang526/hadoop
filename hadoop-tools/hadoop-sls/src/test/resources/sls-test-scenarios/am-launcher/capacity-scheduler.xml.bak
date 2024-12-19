@@ -22,11 +22,7 @@
 
 <configuration>
 
-<!--  <property>-->
-<!--    <name></name>-->
-<!--    <value></value>-->
-<!--  </property>-->
-
+  <!-- Scheduler Conf -->
   <property>
     <name>yarn.scheduler.capacity.resource-calculator</name>
     <value>org.apache.hadoop.yarn.util.resource.DominantResourceCalculator</value>
@@ -37,14 +33,19 @@
     <value>true</value>
   </property>
 
-  <property>
-    <name>yarn.scheduler.capacity.schedule-asynchronously.enable</name>
-    <value>true</value>
-  </property>
+  <!--  <property>-->
+  <!--    <name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name>-->
+  <!--    <value>0</value>-->
+  <!--  </property>-->
+
+  <!--  <property>-->
+  <!--    <name>yarn.scheduler.capacity.schedule-asynchronously.maximum-pending-backlogs</name>-->
+  <!--    <value>10000</value>-->
+  <!--  </property>-->
 
   <property>
-    <name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name>
-    <value>0</value>
+    <name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name>
+    <value>1</value>
   </property>
 
   <property>
@@ -52,6 +53,7 @@
     <value>-1</value>
   </property>
 
+  <!-- Queue Conf -->
   <property>
     <name>yarn.scheduler.capacity.root.queues</name>
     <value>sls_queue_1,sls_queue_2,sls_queue_3</value>
@@ -67,11 +69,6 @@
   <property>
     <name>yarn.scheduler.capacity.root.sls_queue_1.maximum-capacity</name>
     <value>100</value>
-  </property>
-
-  <property>
-    <name>yarn.scheduler.capacity.root.sls_queue_1.show-reservations-as-queues</name>
-    <value>true</value>
   </property>
 
   <property>
@@ -93,4 +90,25 @@
     <name>yarn.scheduler.capacity.root.sls_queue_3.maximum-capacity</name>
     <value>100</value>
   </property>
+
+  <property>
+    <name>yarn.scheduler.capacity.root.sls_queue_1.user-limit-factor</name>
+    <value>4</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.capacity.root.sls_queue_2.user-limit-factor</name>
+    <value>4</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.capacity.root.sls_queue_3.user-limit-factor</name>
+    <value>4</value>
+  </property>
+
+  <property>
+    <name>yarn.scheduler.capacity.maximum-applications</name>
+    <value>10000</value>
+  </property>
+
 </configuration>

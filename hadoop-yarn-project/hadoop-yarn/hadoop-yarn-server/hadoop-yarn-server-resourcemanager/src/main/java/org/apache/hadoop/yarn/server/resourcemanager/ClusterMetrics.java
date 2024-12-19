@@ -74,6 +74,7 @@ public class ClusterMetrics {
     MutableGaugeInt rmDispatcherEventQueueSize;
   @Metric("# of scheduler dispatcher event queue size")
     MutableGaugeInt schedulerDispatcherEventQueueSize;
+  @Metric("multi-nodes scheduling delay") MutableRate multiNodesSchedulingDelay;
 
   private boolean rmEventProcMonitorEnable = false;
 
@@ -373,5 +374,21 @@ public class ClusterMetrics {
 
   public void setSchedulerEventQueueSize(int schedulerEventQueueSize) {
     this.schedulerDispatcherEventQueueSize.set(schedulerEventQueueSize);
+  }
+
+  public long getAMLaunchDelayOps() {
+    return aMLaunchDelay.lastStat().numSamples();
+  }
+
+  public double getAMLaunchDelayAvgTime() {
+    return aMLaunchDelay.lastStat().mean();
+  }
+
+  public double getAMLaunchDelayMaxTime() {
+    return aMLaunchDelay.lastStat().max();
+  }
+
+  public double getMultiNodesSchedulingAvgTime() {
+    return multiNodesSchedulingDelay.lastStat().mean();
   }
 }

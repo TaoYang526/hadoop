@@ -68,6 +68,9 @@ public class SLSConfiguration {
   public static final String NM_RESOURCE_UTILIZATION_RATIO = NM_PREFIX
       + "resource.utilization.ratio";
 
+  // format: <scale-ratio>:<num-ratio>,...
+  public static final String NM_RESOURCE_UPDATE_RATIOS = NM_PREFIX + "resource-update-ratios";
+
   public static final String NM_SLOW_PREFIX = NM_PREFIX + "slow.";
   public static final String NM_SLOW_RATIO = NM_SLOW_PREFIX + "ratio";
   public static final String NM_SLOW_CLEANUP_DELAY_MS = NM_SLOW_PREFIX + "cleanup-delay-ms";
@@ -140,7 +143,8 @@ public class SLSConfiguration {
   public static final String TASK_REQUEST_DELAY = TASK_CONTAINER
       + "request.delay";
 
-  // whether to enable AM launcher
+  // whether to enable controllable AM launcher
+  // for testing ApplicationMasterLauncher
   public static final String CONTROLLABLE_AM_LAUNCHER_ENABLED =
       PREFIX + "controllable_am_launcher.enabled";
 }

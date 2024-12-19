@@ -38,6 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -65,6 +68,7 @@ public class NMRunner {
   private TraceType inputType;
   private String[] inputTraces;
   private SynthTraceJobProducer stjp;
+  List<Map.Entry<Float, Resource>> ratioToResources;
 
   public NMRunner(TaskRunner taskRunner, Configuration conf, ResourceManager rm, String tableMapping, int threadPoolSize) {
     this.taskRunner = taskRunner;
@@ -74,6 +78,29 @@ public class NMRunner {
     this.threadPoolSize = threadPoolSize;
     this.nmMap = new ConcurrentHashMap<>();
     this.nodeManagerResource = getNodeManagerResourceFromConf();
+    initNMRatioConf();
+  }
+
+  private void initNMRatioConf() {
+    // format: <num-ratio>:<scale-ratio>,...
+    String[] resourceUpdateRatios = conf.getStrings(
+        SLSConfiguration.NM_RESOURCE_UPDATE_RATIOS);
+    if (resourceUpdateRatios == null || resourceUpdateRatios.length == 0) {
+      return;
+    }
+    ratioToResources = new ArrayList<>();
+    float curRatio = 0;
+    for (String confItem : resourceUpdateRatios) {
+      String[] ratioPair = confItem.split(":");
+      if (ratioPair.length != 2) {
+        throw new RuntimeException("Invalid resource update ratio: " + confItem);
+      }
+      curRatio += Float.parseFloat(ratioPair[1]);
+      float scaleRatio = Float.parseFloat(ratioPair[0]);
+      Resource updatedResource = Resources.multiplyAndRoundUp(nodeManagerResource, scaleRatio);
+      ratioToResources.add(new AbstractMap.SimpleEntry<>(curRatio, updatedResource));
+    }
+    LOG.info("NM resource update ratios: {}", ratioToResources);
   }
 
   public void startNM() throws YarnException, IOException,
@@ -132,7 +159,7 @@ public class NMRunner {
           try {
             // we randomize the heartbeat start time from zero to 1 interval
             NMSimulator nm = new NMSimulator();
-            Resource nmResource = nodeManagerResource;
+            Resource nmResource = generateNMResource();
             String hostName = nodeDetails.getHostname();
             if (nodeDetails.getNodeResource() != null) {
               nmResource = nodeDetails.getNodeResource();
@@ -163,6 +190,19 @@ public class NMRunner {
     numNMs = nmMap.size();
     LOG.info("SLSRunner has generated {} racks and {} nodes, "
             + "with {} slow nodes.", numRacks, numNMs, numSlowNMs.get());
+  }
+
+  Resource generateNMResource() {
+    if (ratioToResources == null || ratioToResources.isEmpty()) {
+      return nodeManagerResource;
+    }
+    float ratio = new Random().nextFloat();
+    for (Map.Entry<Float, Resource> pair : ratioToResources) {
+      if (ratio <= pair.getKey()) {
+        return pair.getValue();
+      }
+    }
+    return nodeManagerResource;
   }
 
   void waitForNodesRunning() throws InterruptedException {

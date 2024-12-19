@@ -437,10 +437,10 @@ public abstract class SchedulerMetrics {
             (Gauge<Double>) clusterMetrics::getAMLaunchDelayAvgTime);
         metrics.register("variable.cluster.am-launch.delay-max-time",
             (Gauge<Double>) clusterMetrics::getAMLaunchDelayMaxTime);
-        metrics.register("variable.cluster.rm-event-proc.cpu-avg",
-            (Gauge<Long>) clusterMetrics::getRmEventProcCPUAvg);
-        metrics.register("variable.cluster.rm-event-proc.cpu-max",
-            (Gauge<Long>) clusterMetrics::getRmEventProcCPUMax);
+//        metrics.register("variable.cluster.rm-event-proc.cpu-avg",
+//            (Gauge<Long>) clusterMetrics::getRmEventProcCPUAvg);
+//        metrics.register("variable.cluster.rm-event-proc.cpu-max",
+//            (Gauge<Long>) clusterMetrics::getRmEventProcCPUMax);
         metrics.register("variable.cluster.rm-event-proc.queue-size",
             (Gauge<Integer>) clusterMetrics::getRmEventQueueSize);
         metrics.register("variable.cluster.scheduler-event-proc.queue-size",
@@ -451,6 +451,8 @@ public abstract class SchedulerMetrics {
             (Gauge<Integer>) clusterMetrics::getNumDecommissioningNMs);
         metrics.register("variable.cluster.decommissioned-nodes",
             (Gauge<Integer>) clusterMetrics::getNumDecommisionedNMs);
+        metrics.register("variable.cluster.multi-nodes-scheduling-avg-time",
+            (Gauge<Double>) clusterMetrics::getMultiNodesSchedulingAvgTime);
       }
       // counters for scheduler operations
       schedulerAllocateCounter = metrics.counter(

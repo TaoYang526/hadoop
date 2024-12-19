@@ -248,6 +248,8 @@ public class AMRunner {
       runner.schedule(amSim);
       maxRuntime = Math.max(maxRuntime, amDef.getJobFinishTime());
       numTasks += amDef.getTaskContainers().size();
+      LOG.info("AM {} is scheduled, maxRuntime={}, numTasks={}",
+          oldJobId, maxRuntime, numTasks);
       amMap.put(oldJobId, amSim);
     }
   }

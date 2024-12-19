@@ -150,6 +150,9 @@ public class SynthTraceJobProducer implements JobStoryProducer {
       long actualSubmissionTime = wl.generateSubmissionTime();
       String queue = wl.queue_name;
       JobDefinition job = wl.generateJobDefinition();
+      LOG.info("Generated job " + job.class_name + " (workload "
+          + wl.workload_name + ") which will be submitted at "
+          + actualSubmissionTime + " in queue " + queue);
       storyQueue.add(new StoryParams(actualSubmissionTime, queue, job));
     }
     return storyQueue;

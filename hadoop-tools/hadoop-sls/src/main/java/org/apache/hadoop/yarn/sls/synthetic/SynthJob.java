@@ -175,9 +175,10 @@ public class SynthJob implements JobStory {
     name = String.format(jobDef.class_name + "_%06d", id);
     LOG.debug(name + " (" + seed + ")");
 
-    LOG.info("JOB TIMING`: job: " + name + " submission:" + submitTime
+     LOG.info("JOB TIMING`: job: " + name + " submission:" + submitTime
         + " deadline:" + deadline + " duration:" + duration
-        + " deadline-submission: " + (deadline - submitTime));
+        + " deadline-submission: " + (deadline - submitTime)
+        +" num_tasks:" + jobDef.tasks.size());
 
     // Expand tasks
     for(SynthTraceJobProducer.TaskDefinition task : jobDef.tasks){
@@ -191,23 +192,22 @@ public class SynthJob implements JobStory {
       ExecutionType executionType = task.executionType == null
           ? ExecutionType.GUARANTEED
           : ExecutionType.valueOf(task.executionType);
-
       // Save task information by type
       taskByType.put(taskType, new ArrayList<>());
       taskCounts.put(taskType, num);
       taskMemory.put(taskType, memory);
       taskVcores.put(taskType, vcores);
-
       for(int i = 0; i < num; ++i){
         long time = task.time.getLong();
         totalSlotTime += time;
         SynthTask t = new SynthTask(taskType, time, memory, vcores,
             priority, executionType);
+        LOG.info("TASK of {}: {}", this.jobDef.class_name, t);
         tasks.add(t);
         taskByType.get(taskType).add(t);
       }
+      LOG.info("Done initializing for {} {} task", num, task.type);
     }
-
   }
 
   public String getType(){

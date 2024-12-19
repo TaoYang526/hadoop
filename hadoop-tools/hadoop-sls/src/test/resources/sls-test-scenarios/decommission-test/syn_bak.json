@@ -1,0 +1,109 @@
+{
+  "description": "batch and long-running jobs workload",
+  "num_nodes": 6000,
+  "nodes_per_rack": 4,
+  "num_jobs": 10000,
+  "rand_seed": 2,
+  "workloads": [
+    {
+      "workload_name": "batch-test",
+      "workload_weight": 1,
+      "description": "batch jobs",
+      "queue_name": "sls_queue_1",
+      "job_classes": [
+        {
+          "class_name": "class_1",
+          "user_name": "foobar",
+          "class_weight": 1.0,
+          "mtasks_avg": 5,
+          "mtasks_stddev": 1,
+          "rtasks_avg": 5,
+          "rtasks_stddev": 1,
+          "dur_avg": 60,
+          "dur_stddev": 5,
+          "mtime_avg": 3000,
+          "mtime_stddev": 0,
+          "rtime_avg": 3000,
+          "rtime_stddev": 0,
+          "map_max_memory_avg": 1024,
+          "map_max_memory_stddev": 0.001,
+          "map_execution_type": "GUARANTEED",
+          "reduce_max_memory_avg": 2048,
+          "reduce_max_memory_stddev": 0.001,
+          "reduce_execution_type": "GUARANTEED",
+          "map_max_vcores_avg": 1,
+          "map_max_vcores_stddev": 0.001,
+          "reduce_max_vcores_avg": 2,
+          "reduce_max_vcores_stddev": 0.001,
+          "chance_of_reservation": 0,
+          "deadline_factor_avg": 10.0,
+          "deadline_factor_stddev": 0.001
+        }
+      ],
+      "time_distribution": [
+        {
+          "time": 1,
+          "weight": 20
+        },
+        {
+          "time": 60,
+          "weight": 20
+        },
+        {
+          "time": 120,
+          "weight": 20
+        },
+        {
+          "time": 180,
+          "weight": 20
+        },
+        {
+          "time": 240,
+          "weight": 20
+        }
+      ]
+    },
+    {
+      "workload_name": "long-running-test",
+      "workload_weight": 1,
+      "description": "long-running jobs",
+      "queue_name": "sls_queue_1",
+      "job_classes": [
+        {
+          "class_name": "class_2",
+          "user_name": "foobar",
+          "class_weight": 1.0,
+          "mtasks_avg": 5,
+          "mtasks_stddev": 1,
+          "rtasks_avg": 5,
+          "rtasks_stddev": 1,
+          "dur_avg": 3000,
+          "dur_stddev": 0,
+          "mtime_avg": 3000000,
+          "mtime_stddev": 0,
+          "rtime_avg": 3000000,
+          "rtime_stddev": 0,
+          "map_max_memory_avg": 1024,
+          "map_max_memory_stddev": 0,
+          "map_execution_type": "GUARANTEED",
+          "reduce_max_memory_avg": 1024,
+          "reduce_max_memory_stddev": 0,
+          "reduce_execution_type": "GUARANTEED",
+          "map_max_vcores_avg": 5,
+          "map_max_vcores_stddev": 0.001,
+          "reduce_max_vcores_avg": 5,
+          "reduce_max_vcores_stddev": 0.001,
+          "chance_of_reservation": 0,
+          "deadline_factor_avg": 10.0,
+          "deadline_factor_stddev": 0.001
+        }
+      ],
+      "time_distribution": [
+        {
+          "time": 1,
+          "weight": 100
+        }
+      ]
+    }
+  ]
+}

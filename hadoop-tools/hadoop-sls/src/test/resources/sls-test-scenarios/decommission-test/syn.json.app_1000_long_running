@@ -1,8 +1,8 @@
 {
   "description": "long-running jobs workload",
-  "num_nodes": 1000,
+  "num_nodes": 6000,
   "nodes_per_rack": 4,
-  "num_jobs": 10,
+  "num_jobs": 1000,
   "rand_seed": 2,
   "workloads": [
     {
@@ -15,9 +15,9 @@
           "class_name": "class_1",
           "user_name": "foobar",
           "class_weight": 1.0,
-          "mtasks_avg": 10000,
+          "mtasks_avg": 100,
           "mtasks_stddev": 1,
-          "rtasks_avg": 100,
+          "rtasks_avg": 10,
           "rtasks_stddev": 1,
           "dur_avg": 60,
           "dur_stddev": 5,
@@ -25,15 +25,15 @@
           "mtime_stddev": 0,
           "rtime_avg": 3000000,
           "rtime_stddev": 0,
-          "map_max_memory_avg": 1024,
+          "map_max_memory_avg": 5120,
           "map_max_memory_stddev": 0.001,
           "map_execution_type": "GUARANTEED",
-          "reduce_max_memory_avg": 2048,
+          "reduce_max_memory_avg": 5120,
           "reduce_max_memory_stddev": 0.001,
           "reduce_execution_type": "GUARANTEED",
-          "map_max_vcores_avg": 1,
+          "map_max_vcores_avg": 5,
           "map_max_vcores_stddev": 0.001,
-          "reduce_max_vcores_avg": 2,
+          "reduce_max_vcores_avg": 5,
           "reduce_max_vcores_stddev": 0.001,
           "chance_of_reservation": 0.5,
           "deadline_factor_avg": 10.0,
@@ -43,27 +43,7 @@
       "time_distribution": [
         {
           "time": 1,
-          "weight": 50
-        },
-        {
-          "time": 60,
-          "weight": 10
-        },
-        {
-          "time": 120,
-          "weight": 10
-        },
-        {
-          "time": 180,
-          "weight": 10
-        },
-        {
-          "time": 240,
-          "weight": 10
-        },
-        {
-          "time": 300,
-          "weight": 10
+          "weight": 100
         }
       ]
     }
