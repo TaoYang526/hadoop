@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
@@ -1142,10 +1143,12 @@ public abstract class AbstractParentQueue extends AbstractCSQueue {
       ResourceLimits resourceLimits) {
     CSQueueUtils.updateQueueStatistics(resourceCalculator, clusterResource,
         this, labelManager, null);
-    // Update configured capacity/max-capacity for default partition only
-    CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
-        labelManager.getResourceByLabel(null, clusterResource),
-        RMNodeLabelsManager.NO_LABEL, this);
+    // Update configured capacity/max-capacity for  configured partitions
+    Set<String> configuredNodeLabels = this.getConfiguredNodeLabels();
+    for (String label : configuredNodeLabels) {
+      CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
+          labelManager.getResourceByLabel(label, clusterResource), label, this);
+    }
 
     LOG.info("Refresh after resource calculation (PARENT) {}\n"
             + "effectiveMinResource = {}\n"
@@ -1259,10 +1262,13 @@ public abstract class AbstractParentQueue extends AbstractCSQueue {
 
       CSQueueUtils.updateQueueStatistics(resourceCalculator, clusterResource,
           this, labelManager, null);
-      // Update configured capacity/max-capacity for default partition only
-      CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
-          labelManager.getResourceByLabel(null, clusterResource),
-          RMNodeLabelsManager.NO_LABEL, this);
+      // Update configured capacity/max-capacity for configured partitions
+      Set<String> configuredNodeLabels = this.getConfiguredNodeLabels();
+      for (String label : configuredNodeLabels) {
+        CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
+            labelManager.getResourceByLabel(label, clusterResource),
+            label, this);
+      }
     } catch (IOException e) {
       LOG.error("Error during updating cluster resource: ", e);
       throw new YarnRuntimeException("Fatal issue during scheduling", e);

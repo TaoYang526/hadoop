@@ -199,6 +199,10 @@ public class CSQueueMetrics extends QueueMetrics {
             GUARANTEED_CAPACITY_METRIC_PREFIX, GUARANTEED_CAPACITY_METRIC_DESC);
       }
     }
+    QueueMetrics partitionQueueMetrics = getPartitionQueueMetrics(partition);
+    if (partitionQueueMetrics instanceof CSPartitionQueueMetrics) {
+      ((CSPartitionQueueMetrics) partitionQueueMetrics).setGuaranteedResources(res);
+    }
   }
 
   public long getMaxCapacityMB() {
@@ -219,6 +223,10 @@ public class CSQueueMetrics extends QueueMetrics {
             csQueueMetricsForCustomResources.getMaxCapacity(), registry,
             MAX_CAPACITY_METRIC_PREFIX, MAX_CAPACITY_METRIC_DESC);
       }
+    }
+    QueueMetrics partitionQueueMetrics = getPartitionQueueMetrics(partition);
+    if (partitionQueueMetrics instanceof CSPartitionQueueMetrics) {
+      ((CSPartitionQueueMetrics) partitionQueueMetrics).setMaxCapacityResources(res);
     }
   }
 
@@ -370,5 +378,10 @@ public class CSQueueMetrics extends QueueMetrics {
       maxCapacity.set(capacity);
       maxAbsoluteCapacity.set(absoluteCapacity);
     }
+  }
+
+  protected QueueMetrics createPartitionQueueMetrics(String partition) {
+    return new CSPartitionQueueMetrics(metricsSystem, this.queueName, parentQueue,
+        this.enableUserMetrics, this.conf, partition);
   }
 }

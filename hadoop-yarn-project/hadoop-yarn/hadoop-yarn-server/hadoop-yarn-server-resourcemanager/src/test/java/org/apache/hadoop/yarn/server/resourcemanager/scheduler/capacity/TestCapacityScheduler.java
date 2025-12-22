@@ -2952,6 +2952,172 @@ public class TestCapacityScheduler {
     rm.stop();
   }
 
+  private Configuration getConfigurationWithLabels(Configuration config) {
+    CapacitySchedulerConfiguration conf =
+        new CapacitySchedulerConfiguration(config);
+    conf.setResourceComparator(DominantResourceCalculator.class);
+    // Define top-level queues
+    QueuePath rootQueuePath = new QueuePath(CapacitySchedulerConfiguration.ROOT);
+    conf.setQueues(rootQueuePath, new String[] {"a", "b"});
+    conf.setCapacityByLabel(rootQueuePath, "x", 100);
+
+    final QueuePath A = new QueuePath(CapacitySchedulerConfiguration.ROOT + ".a");
+    conf.setCapacity(A, 50);
+    conf.setMaximumCapacity(A, 80);
+    conf.setAccessibleNodeLabels(A, toSet("x"));
+    conf.setCapacityByLabel(A, "x", 20);
+
+    final QueuePath B = new QueuePath(CapacitySchedulerConfiguration.ROOT + ".b");
+    conf.setCapacity(B, 50);
+    conf.setAccessibleNodeLabels(B, toSet("x"));
+    conf.setCapacityByLabel(B, "x", 80);
+
+    // Define 2nd-level queues
+    conf.setQueues(A, new String[] {"a1", "a2"});
+
+    final QueuePath A1 = new QueuePath(A + ".a1");
+    conf.setCapacity(A1, 50);
+    conf.setMaximumCapacity(A1, 100);
+    conf.setCapacityByLabel(A1, "x", 60);
+
+    final QueuePath A2 = new QueuePath(A + ".a2");
+    conf.setCapacity(A2, 50);
+    conf.setMaximumCapacity(A2, 100);
+    conf.setCapacityByLabel(A2, "x", 40);
+
+    final QueuePath B1 = new QueuePath(B + ".b1");
+    conf.setQueues(B, new String[] {"b1"});
+    conf.setCapacity(B1, 100);
+    conf.setMaximumCapacity(B1, 100);
+    conf.setCapacityByLabel(B1, "x", 100);
+
+    return conf;
+  }
+
+  @Test
+  public void testCSPartitionQueueMetrics() throws Exception {
+    Configuration conf = getConfigurationWithLabels(new Configuration());
+    // set node -> label
+    RMNodeLabelsManager mgr = new NullRMNodeLabelsManager();
+    mgr.init(conf);
+    mgr.addToCluserNodeLabelsWithDefaultExclusivity(ImmutableSet.of("x"));
+    mgr.addLabelsToNode(ImmutableMap.of(NodeId.newInstance("h3", 0), toSet("x")));
+    // inject node label manager
+    MockRM rm1 = new MockRM(conf) {
+      @Override
+      public RMNodeLabelsManager createNodeLabelManager() {
+        return mgr;
+      }
+    };
+    rm1.getRMContext().setNodeLabelManager(mgr);
+    rm1.start();
+    rm1.registerNode("h1:1234", 204800, 100); // label = <empty>
+    rm1.registerNode("h3:1234", 204800, 100); // label = x
+
+    CapacityScheduler cs = (CapacityScheduler) rm1.getRMContext().getScheduler();
+
+    /*
+     * Check partition queue metrics
+     */
+
+    // queue: a
+    // label="", capacity=0.5, maxCapacity=0.8
+    CSPartitionQueueMetrics defaultLabelA =
+        (CSPartitionQueueMetrics) cs.getQueue("a").getMetrics()
+            .getPartitionQueueMetrics("");
+    assertEquals(50, defaultLabelA.getGuaranteedVCores());
+    assertEquals(102400, defaultLabelA.getGuaranteedMB());
+    assertEquals(80, defaultLabelA.getMaxCapacityVCores());
+    assertEquals(163840, defaultLabelA.getMaxCapacityMB());
+
+    // label="x", capacity=0.2, maxCapacity=1
+    CSPartitionQueueMetrics xLabelA =
+        (CSPartitionQueueMetrics) cs.getQueue("a").getMetrics()
+            .getPartitionQueueMetrics("x");
+    assertEquals(20, xLabelA.getGuaranteedVCores());
+    assertEquals(40960, xLabelA.getGuaranteedMB());
+    assertEquals(100, xLabelA.getMaxCapacityVCores());
+    assertEquals(204800, xLabelA.getMaxCapacityMB());
+
+    // queue: a1
+    // label="", capacity=0.5, maxCapacity=1
+    CSPartitionQueueMetrics defaultLabelA1 =
+        (CSPartitionQueueMetrics) cs.getQueue("a1").getMetrics()
+            .getPartitionQueueMetrics("");
+    assertEquals(25, defaultLabelA1.getGuaranteedVCores());
+    assertEquals(51200, defaultLabelA1.getGuaranteedMB());
+    assertEquals(80, defaultLabelA1.getMaxCapacityVCores());
+    assertEquals(163840, defaultLabelA1.getMaxCapacityMB());
+
+    // label="x", capacity=0.6, maxCapacity=1
+    CSPartitionQueueMetrics xLabelA1 =
+        (CSPartitionQueueMetrics) cs.getQueue("a1").getMetrics()
+            .getPartitionQueueMetrics("x");
+    assertEquals(12, xLabelA1.getGuaranteedVCores());
+    assertEquals(24576, xLabelA1.getGuaranteedMB());
+    assertEquals(100, xLabelA1.getMaxCapacityVCores());
+    assertEquals(204800, xLabelA1.getMaxCapacityMB());
+
+    // queue: a2
+    // label="", capacity=0.5, maxCapacity=1
+    CSPartitionQueueMetrics defaultLabelA2 =
+        (CSPartitionQueueMetrics) cs.getQueue("a2").getMetrics()
+            .getPartitionQueueMetrics("");
+    assertEquals(25, defaultLabelA2.getGuaranteedVCores());
+    assertEquals(51200, defaultLabelA2.getGuaranteedMB());
+    assertEquals(80, defaultLabelA2.getMaxCapacityVCores());
+    assertEquals(163840, defaultLabelA2.getMaxCapacityMB());
+
+    // label="x", capacity=0.4, maxCapacity=1
+    CSPartitionQueueMetrics xLabelA2 =
+        (CSPartitionQueueMetrics) cs.getQueue("a2").getMetrics()
+            .getPartitionQueueMetrics("x");
+    assertEquals(8, xLabelA2.getGuaranteedVCores());
+    assertEquals(16384, xLabelA2.getGuaranteedMB());
+    assertEquals(100, xLabelA2.getMaxCapacityVCores());
+    assertEquals(204800, xLabelA2.getMaxCapacityMB());
+
+    // queue: b
+    // label="", capacity=0.5, maxCapacity=1
+    CSPartitionQueueMetrics defaultLabelB =
+        (CSPartitionQueueMetrics) cs.getQueue("b").getMetrics()
+            .getPartitionQueueMetrics("");
+    assertEquals(50, defaultLabelB.getGuaranteedVCores());
+    assertEquals(102400, defaultLabelB.getGuaranteedMB());
+    assertEquals(100, defaultLabelB.getMaxCapacityVCores());
+    assertEquals(204800, defaultLabelB.getMaxCapacityMB());
+
+    // label="x", capacity=0.8, maxCapacity=1
+    CSPartitionQueueMetrics xLabelB =
+        (CSPartitionQueueMetrics) cs.getQueue("b").getMetrics()
+            .getPartitionQueueMetrics("x");
+    assertEquals(80, xLabelB.getGuaranteedVCores());
+    assertEquals(163840, xLabelB.getGuaranteedMB());
+    assertEquals(100, xLabelB.getMaxCapacityVCores());
+    assertEquals(204800, xLabelB.getMaxCapacityMB());
+
+    // queue: b1
+    // label="", capacity=1, maxCapacity=1
+    CSPartitionQueueMetrics defaultLabelB1 =
+        (CSPartitionQueueMetrics) cs.getQueue("b1").getMetrics()
+            .getPartitionQueueMetrics("");
+    assertEquals(50, defaultLabelB1.getGuaranteedVCores());
+    assertEquals(102400, defaultLabelB1.getGuaranteedMB());
+    assertEquals(100, defaultLabelB1.getMaxCapacityVCores());
+    assertEquals(204800, defaultLabelB1.getMaxCapacityMB());
+
+    // label="x", capacity=1, maxCapacity=1
+    CSPartitionQueueMetrics xLabelB1 =
+        (CSPartitionQueueMetrics) cs.getQueue("b1").getMetrics()
+            .getPartitionQueueMetrics("x");
+    assertEquals(80, xLabelB1.getGuaranteedVCores());
+    assertEquals(163840, xLabelB1.getGuaranteedMB());
+    assertEquals(100, xLabelB1.getMaxCapacityVCores());
+    assertEquals(204800, xLabelB1.getMaxCapacityMB());
+
+    rm1.close();
+  }
+
   @Test
   public void testReservedContainerLeakWhenMoveApplication() throws Exception {
     CapacitySchedulerConfiguration csConf

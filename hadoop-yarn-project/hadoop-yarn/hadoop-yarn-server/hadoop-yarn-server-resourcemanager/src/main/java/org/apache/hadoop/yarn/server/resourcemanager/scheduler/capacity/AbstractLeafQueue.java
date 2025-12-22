@@ -1988,10 +1988,13 @@ public class AbstractLeafQueue extends AbstractCSQueue {
     // Update metrics
     CSQueueUtils.updateQueueStatistics(resourceCalculator, clusterResource,
         this, labelManager, null);
-    // Update configured capacity/max-capacity for default partition only
-    CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
-        labelManager.getResourceByLabel(null, clusterResource),
-        NO_LABEL, this);
+    // Update configured capacity/max-capacity for configured partitions
+    Set<String> configuredNodeLabels = this.getConfiguredNodeLabels();
+    for (String label : configuredNodeLabels) {
+      CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
+          labelManager.getResourceByLabel(label, clusterResource),
+          label, this);
+    }
 
     // queue metrics are updated, more resource may be available
     // activate the pending applications if possible
@@ -2064,10 +2067,13 @@ public class AbstractLeafQueue extends AbstractCSQueue {
       // Update metrics
       CSQueueUtils.updateQueueStatistics(resourceCalculator, clusterResource,
           this, labelManager, null);
-      // Update configured capacity/max-capacity for default partition only
-      CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
-          labelManager.getResourceByLabel(null, clusterResource),
-          RMNodeLabelsManager.NO_LABEL, this);
+      // Update configured capacity/max-capacity for configured partitions
+      Set<String> configuredNodeLabels = this.getConfiguredNodeLabels();
+      for (String label : configuredNodeLabels) {
+        CSQueueUtils.updateConfiguredCapacityMetrics(resourceCalculator,
+            labelManager.getResourceByLabel(label, clusterResource), label,
+            this);
+      }
 
       // queue metrics are updated, more resource may be available
       // activate the pending applications if possible

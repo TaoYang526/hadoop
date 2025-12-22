@@ -139,13 +139,13 @@ public class QueueMetrics implements MetricsSource {
   protected final MetricsRegistry registry;
   protected final String queueName;
   private QueueMetrics parent;
-  private Queue parentQueue;
+  protected Queue parentQueue;
   protected final MetricsSystem metricsSystem;
   protected final Map<String, QueueMetrics> users;
   protected final Configuration conf;
   private QueueMetricsForCustomResources queueMetricsForCustomResources;
 
-  private final boolean enableUserMetrics;
+  protected final boolean enableUserMetrics;
 
   protected static final MetricsInfo P_RECORD_INFO =
       info("PartitionQueueMetrics", "Metrics for the resource scheduler");
@@ -335,9 +335,7 @@ public class QueueMetrics implements MetricsSource {
     QueueMetrics metrics = getQueueMetrics().get(metricName);
 
     if (metrics == null) {
-      QueueMetrics queueMetrics =
-          new PartitionQueueMetrics(metricsSystem, this.queueName, parentQueue,
-              this.enableUserMetrics, this.conf, partition);
+      QueueMetrics queueMetrics = createPartitionQueueMetrics(partition);
       metricsSystem.register(
           pSourceName(partitionJMXStr).append(qSourceName(this.queueName))
               .toString(),
@@ -352,6 +350,11 @@ public class QueueMetrics implements MetricsSource {
     } else {
       return metrics;
     }
+  }
+
+  protected QueueMetrics createPartitionQueueMetrics(String partition) {
+    return new PartitionQueueMetrics(metricsSystem, this.queueName, parentQueue,
+        this.enableUserMetrics, this.conf, partition);
   }
 
   /**
